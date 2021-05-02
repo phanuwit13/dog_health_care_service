@@ -4,7 +4,7 @@ const api = require('./routes/api')
 var bodyParser = require('body-parser')
 const cors = require('cors')
 const formData = require('express-form-data')
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 4020
 
 app.use(formData.parse())
 
@@ -21,6 +21,6 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`)
 })
 
-app.listen(3000, () => {
-  console.log('Start server at port 3000.')
-})
+// app.listen(3000, () => {
+//   console.log('Start server at port 3000.')
+// })

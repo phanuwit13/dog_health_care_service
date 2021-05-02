@@ -1,3 +1,4 @@
+const e = require('express')
 const db = require('../util/db')
 const database = db.connection
 
@@ -327,7 +328,7 @@ exports.getcompanyData = (req, res, next) => {
     try {
       database.query(
         query,
-        ['%' + req.body.status + '%', '%' + req.body.company_id + '%'],
+        ['%' + req.body.status + '%', '%' + req.body.company_id],
         function (err, rows, fields) {
           if (err) {
             // res.status(200).json({ success: false, data: null, message: err });
@@ -551,31 +552,34 @@ exports.updateStatusCarcardId = (req, res, next) => {
 exports.getLoseExdUser = (req, res, next) => {
   return (req, res, next) => {
     var exdUser =
-      "SELECT * FROM `user` as u LEFT JOIN company as c on u.company_id = c.company_id WHERE   type_driver = 0 && status_carcard_id = 1 && u.status LIKE 'approved' "
-
+      "SELECT * FROM `user` as u LEFT JOIN company as c on u.company_id = c.company_id WHERE   type_driver = 0 && status_carcard_id = 1 && u.status LIKE 'approved'&&  u.company_id like ? "
     try {
-      database.query(exdUser, function (err, rows, fields) {
-        if (err) {
-          // res.status(200).json({ success: false, data: null, message: err });
-          throw new Error(err)
-        }
-        if (rows.length > 0) {
-          // res.status(200).json({ success: false, data: null, message: err });
-          res.data = {
-            success: true,
-            data: rows,
-            message: 'พบข้อมูล !',
+      database.query(
+        exdUser,
+        [req.body.company_id ? '%' + req.body.company_id : '%'],
+        function (err, rows, fields) {
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
           }
-          next()
-        } else {
-          res.data = {
-            success: false,
-            data: rows,
-            message: 'ไม่พบข้อมูล !',
+          if (rows.length > 0) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            res.data = {
+              success: true,
+              data: rows,
+              message: 'พบข้อมูล !',
+            }
+            next()
+          } else {
+            res.data = {
+              success: false,
+              data: rows,
+              message: 'ไม่พบข้อมูล !',
+            }
+            next()
           }
-          next()
         }
-      })
+      )
     } catch (error) {
       return res
         .status(200)
@@ -631,7 +635,7 @@ exports.getDriver = (req, res, next) => {
     try {
       database.query(
         query,
-        ['%' + req.body.status + '%', '%' + req.body.company_id + '%'],
+        ['%' + req.body.status + '%', '%' + req.body.company_id],
         function (err, rows, fields) {
           if (err) {
             // res.status(200).json({ success: false, data: null, message: err });
@@ -733,7 +737,7 @@ exports.getCar = (req, res, next) => {
     try {
       database.query(
         queryCar,
-        ['%' + req.body.company_id + '%'],
+        ['%' + req.body.company_id],
         function (err, rows, fields) {
           if (err) {
             // res.status(200).json({ success: false, data: null, message: err });
@@ -825,7 +829,7 @@ exports.addCar = (req, res, next) => {
                 req.body.car_brand.toUpperCase(),
                 req.body.car_detail,
                 req.body.company_id,
-                req.body.route_id
+                req.body.route_id,
               ],
               function (err, rows, fields) {
                 if (err) {
@@ -857,7 +861,7 @@ exports.addCar = (req, res, next) => {
                 req.body.car_brand.toUpperCase(),
                 req.body.car_detail,
                 req.body.company_id,
-                req.body.route_id
+                req.body.route_id,
               ],
               function (err, rows, fields) {
                 if (err) {
@@ -960,11 +964,12 @@ exports.getRoutePosition = (req, res, next) => {
 }
 exports.getRouteSelect = (req, res, next) => {
   return (req, res, next) => {
-    var query = 'SELECT * from routes where company_id Like ?'
+    var query =
+      'SELECT route_id,route_name,routes.route_company_id,route_price,route_company.company_id,route_number,company_name, company_address,company_phone FROM `routes` LEFT JOIN route_company ON routes.route_company_id = route_company.route_company_id LEFT JOIN company ON route_company.company_id = company.company_id WHERE routes.route_company_id LIKE ?'
     try {
       database.query(
         query,
-        ['%' + req.body.company_id + '%'],
+        ['%' + req.body.route_company_id],
         function (err, rows, fields) {
           if (err) {
             // res.status(200).json({ success: false, data: null, message: err });
@@ -1032,7 +1037,7 @@ exports.updateRoute = (req, res, next) => {
   return (req, res, next) => {
     let point = JSON.parse(req.body.position)
     var updateCompany =
-      'UPDATE routes SET route_name = ?, route_number = ?,route_price=?,company_id=? WHERE route_id =?;'
+      'UPDATE routes SET route_name = ?,route_price=?,route_company_id=? WHERE route_id =?;'
     var deletePosition =
       'DELETE FROM position_route WHERE route_id=? && direction=?;'
     var insertPosition =
@@ -1042,9 +1047,8 @@ exports.updateRoute = (req, res, next) => {
         updateCompany,
         [
           req.body.route_name,
-          req.body.route_number,
           req.body.route_price,
-          req.body.company_id,
+          req.body.route_company_id,
           req.body.route_id,
         ],
         function (err, rows, fields) {
@@ -1111,7 +1115,7 @@ exports.addRoute = (req, res, next) => {
   return (req, res, next) => {
     let point = JSON.parse(req.body.position)
     var insertCompany =
-      'INSERT into routes (route_id,route_name, route_number, route_price,company_id)VALUES (null, ?, ?, ?,?)'
+      'INSERT into routes (route_id,route_name, route_price,route_company_id)VALUES (null, ?, ?,?)'
     var insertPosition =
       'INSERT INTO position_route (position_id,lat, lng, route_id,direction)VALUES (null, ?, ?, ?,?)'
     if (req.body.route_id != undefined) {
@@ -1147,9 +1151,8 @@ exports.addRoute = (req, res, next) => {
           insertCompany,
           [
             req.body.route_name,
-            req.body.route_number,
             req.body.route_price,
-            req.body.company_id,
+            req.body.route_company_id,
           ],
           function (err, rows, fields) {
             if (err) {
@@ -1198,7 +1201,7 @@ exports.addRoute = (req, res, next) => {
 exports.getRouteGo = (req, res, next) => {
   return (req, res, next) => {
     var query =
-      'SELECT * FROM routes INNER JOIN (SELECT route_id FROM `position_route` WHERE direction =0 GROUP BY route_id EXCEPT SELECT route_id FROM `position_route` WHERE direction =1 GROUP BY route_id) AS routeselect ON routes.route_id = routeselect.route_id    '
+      'SELECT * FROM routes INNER JOIN (SELECT route_id FROM `position_route` WHERE direction =0 GROUP BY route_id EXCEPT SELECT route_id FROM `position_route` WHERE direction =1 GROUP BY route_id) AS routeselect ON routes.route_id = routeselect.route_id LEFT JOIN route_company ON routes.route_company_id = route_company.route_company_id   '
     try {
       database.query(query, function (err, rows, fields) {
         if (err) {
@@ -1408,21 +1411,300 @@ exports.setPosition = (req, res, next) => {
 
 exports.getCarEnable = (req, res, next) => {
   return (req, res, next) => {
-    var query = 'SELECT * from car where driver_id IS NOT NULL && route_id = ?'
+    var query = 'SELECT * from car LEFT JOIN user on car.driver_id = user.driver_id where car.driver_id IS NOT NULL && route_id = ?'
+    try {
+      database.query(query, [req.body.route_id], function (err, rows, fields) {
+        if (err) {
+          // res.status(200).json({ success: false, data: null, message: err });
+          throw new Error(err)
+        }
+
+        res.data = {
+          success: true,
+          data: rows,
+          message: 'สำเร็จ !',
+        }
+        next()
+      })
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+exports.getRouteCompany = (req, res, next) => {
+  return (req, res, next) => {
+    var query =
+      'SELECT * from route_company as rc LEFT JOIN company as c ON rc.company_id = c.company_id'
+    try {
+      database.query(query, function (err, rows, fields) {
+        if (err) {
+          // res.status(200).json({ success: false, data: null, message: err });
+          throw new Error(err)
+        }
+        if (rows.length > 0) {
+          res.data = {
+            success: true,
+            data: rows,
+            message: 'พบข้อมูล !',
+          }
+          next()
+        } else {
+          res.data = {
+            success: false,
+            data: rows,
+            message: 'ไม่พบข้อมูล !',
+          }
+          next()
+        }
+      })
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+exports.getCarRouteCompany = (req, res, next) => {
+  return (req, res, next) => {
+    var query =
+      'SELECT * from route_company as rc LEFT JOIN company as c ON rc.company_id = c.company_id where rc.company_id = ?'
     try {
       database.query(
         query,
-        [req.body.route_id], 
+        [req.body.company_id],
+        function (err, rows, fields) {
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
+          }
+          if (rows.length > 0) {
+            res.data = {
+              success: true,
+              data: rows,
+              message: 'พบข้อมูล !',
+            }
+            next()
+          } else {
+            res.data = {
+              success: false,
+              data: rows,
+              message: 'ไม่พบข้อมูล !',
+            }
+            next()
+          }
+        }
+      )
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+exports.addRouteCompany = (req, res, next) => {
+  return (req, res, next) => {
+    var query = 'SELECT * from route_company where route_number = ?'
+    var insert =
+      'INSERT INTO route_company (route_company_id,company_id, route_number)VALUES (null, ?, ?)'
+    try {
+      database.query(
+        query,
+        [req.body.route_number],
         function (err, rows, fields) {
           if (err) {
             // res.status(200).json({ success: false, data: null, message: err });
             throw new Error(err)
           }
 
+          if (rows.length > 0) {
+            res.status(200).json({
+              success: false,
+              data: null,
+              message: 'มีสายนี้อยู่ในระบบแล้ว',
+            })
+            return
+          } else {
+            try {
+              database.query(
+                insert,
+                [
+                  req.body.company_id ? req.body.company_id : null,
+                  req.body.route_number,
+                ],
+                function (err, rows, fields) {
+                  if (err) {
+                    // res.status(200).json({ success: false, data: null, message: err });
+                    throw new Error(err)
+                  }
+                  res.data = {
+                    success: true,
+                    data: rows,
+                    message: 'เพิ่มข้อมูลสำเร็จ !',
+                  }
+                  next()
+                }
+              )
+            } catch (error) {
+              return res
+                .status(200)
+                .json({ success: false, data: null, message: error.message })
+            }
+          }
+        }
+      )
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+exports.deleteRouteCompany = (req, res, next) => {
+  return (req, res, next) => {
+    var deleteUser = 'DELETE FROM route_company WHERE route_company_id = ?'
+    try {
+      database.query(
+        deleteUser,
+        [req.body.route_company_id],
+        function (err, rows, fields) {
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
+          }
           res.data = {
             success: true,
             data: rows,
-            message: 'สำเร็จ !',
+            message: 'ลบข้อมูลสำเร็จ !',
+          }
+
+          next()
+        }
+      )
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+exports.updateRouteCompany = (req, res, next) => {
+  return (req, res, next) => {
+    var update =
+      'UPDATE route_company SET company_id= ?, route_number = ? where route_company_id = ?'
+    var query = 'SELECT * from route_company where route_number = ?'
+    if (req.body.route_number != req.body.route_number_old) {
+      try {
+        database.query(
+          query,
+          [req.body.route_number],
+          function (err, rows, fields) {
+            if (err) {
+              // res.status(200).json({ success: false, data: null, message: err });
+              throw new Error(err)
+            }
+
+            if (rows.length > 0) {
+              res.status(200).json({
+                success: false,
+                data: null,
+                message: 'มีสายนี้อยู่ในระบบแล้ว',
+              })
+              return
+            } else {
+              try {
+                database.query(
+                  update,
+                  [
+                    req.body.company_id ? req.body.company_id : null,
+                    req.body.route_number,
+                    req.body.route_company_id,
+                  ],
+                  function (err, rows, fields) {
+                    if (err) {
+                      // res.status(200).json({ success: false, data: null, message: err });
+                      throw new Error(err)
+                    }
+                    res.data = {
+                      success: true,
+                      data: rows,
+                      message: 'อัพเดทข้อมูลสำเร็จ !',
+                    }
+                    next()
+                  }
+                )
+              } catch (error) {
+                return res
+                  .status(200)
+                  .json({ success: false, data: null, message: error.message })
+              }
+            }
+          }
+        )
+      } catch (error) {
+        return res
+          .status(200)
+          .json({ success: false, data: null, message: error.message })
+      }
+    } else {
+      try {
+        database.query(
+          update,
+          [
+            req.body.company_id ? req.body.company_id : null,
+            req.body.route_number,
+            req.body.route_company_id,
+          ],
+          function (err, rows, fields) {
+            if (err) {
+              // res.status(200).json({ success: false, data: null, message: err });
+              throw new Error(err)
+            }
+            res.data = {
+              success: true,
+              data: rows,
+              message: 'อัพเดทข้อมูลสำเร็จ !',
+            }
+            next()
+          }
+        )
+      } catch (error) {
+        return res
+          .status(200)
+          .json({ success: false, data: null, message: error.message })
+      }
+    }
+  }
+}
+exports.getCompanyNotRoute = (req, res, next) => {
+  return (req, res, next) => {
+    var query =
+      'Select* FROM company INNER JOIN (SELECT company_id FROM `company` EXCEPT SELECT company_id FROM `route_company`  where route_company.company_id != ? ) as cc on company.company_id = cc.company_id'
+    try {
+      database.query(
+        query,
+        [req.body.company_id ? req.body.company_id : ''],
+        function (err, rows, fields) {
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
+          }
+
+          if (rows.length > 0) {
+            res.data = {
+              success: true,
+              data: rows,
+              message: 'พบข้อมูล !',
+            }
+            next()
+          } else {
+            res.data = {
+              success: false,
+              data: rows,
+              message: 'ไม่พบข้อมูล !',
+            }
+            next()
           }
           next()
         }

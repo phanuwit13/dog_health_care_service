@@ -58,7 +58,7 @@ route.post(
     res.status(200).json(response)
   }
 )
-route.get(
+route.post(
   '/getloseexduser',
   car_tracking.getLoseExdUser(),
   function (req, res) {
@@ -161,6 +161,31 @@ route.post('/setposition', car_tracking.setPosition(), function (req, res) {
 })
 
 route.post('/getcarenable', car_tracking.getCarEnable(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+// สาย
+route.post('/getcompanynotroute', car_tracking.getCompanyNotRoute(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+route.post('/getroutecompany', car_tracking.getRouteCompany(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+route.post('/addroutecompany', car_tracking.addRouteCompany(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+route.post('/deleteroutecompany', car_tracking.deleteRouteCompany(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+route.post('/updateroutecompany', car_tracking.updateRouteCompany(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+route.post('/getcarroutecompany', car_tracking.getCarRouteCompany(), function (req, res) {
   var response = res.data
   res.status(200).json(response)
 })
