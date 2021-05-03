@@ -1680,7 +1680,7 @@ exports.updateRouteCompany = (req, res, next) => {
 exports.getCompanyNotRoute = (req, res, next) => {
   return (req, res, next) => {
     var query =
-      'Select* FROM company INNER JOIN (SELECT company_id FROM `company` EXCEPT SELECT company_id FROM `route_company`  where route_company.company_id != ? ) as cc on company.company_id = cc.company_id'
+      'Select* FROM company INNER JOIN (SELECT company.company_id FROM `company` LEFT JOIN `route_company` on company.company_id = route_company.company_id WHERE route_company.company_id IS NULL || route_company.company_id = ?) as cc on company.company_id = cc.company_id'
     try {
       database.query(
         query,
