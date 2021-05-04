@@ -1201,7 +1201,7 @@ exports.addRoute = (req, res, next) => {
 exports.getRouteGo = (req, res, next) => {
   return (req, res, next) => {
     var query =
-      'SELECT * FROM routes INNER JOIN (SELECT route_id FROM `position_route` WHERE direction =0 GROUP BY route_id EXCEPT SELECT route_id FROM `position_route` WHERE direction =1 GROUP BY route_id) AS routeselect ON routes.route_id = routeselect.route_id LEFT JOIN route_company ON routes.route_company_id = route_company.route_company_id   '
+      'SELECT * FROM routes INNER JOIN (SELECT route_id FROM `position_route` as pr1 WHERE pr1.direction =0 AND NOT route_id IN ( SELECT route_id FROM `position_route` as pr2 WHERE pr2.direction =1) GROUP BY route_id) AS routeselect ON routes.route_id = routeselect.route_id LEFT JOIN route_company ON routes.route_company_id = route_company.route_company_id'
     try {
       database.query(query, function (err, rows, fields) {
         if (err) {
