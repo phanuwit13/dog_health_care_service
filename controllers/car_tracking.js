@@ -801,6 +801,8 @@ exports.addCar = (req, res, next) => {
     var getCar = 'SELECT * from car'
     var addCar =
       'INSERT INTO car (car_id,car_number, provinces,car_color,car_brand,car_detail,company_id,route_id) VALUES (null, ?,?,?,?,?,?,?)'
+    var round =
+      'INSERT INTO car_round (car_round_id,car_id) VALUES (null, ?)'
     try {
       database.query(getCar, function (err, rows, fields) {
         if (err) {
@@ -836,13 +838,34 @@ exports.addCar = (req, res, next) => {
                   // res.status(200).json({ success: false, data: null, message: err });
                   throw new Error(err)
                 }
-
-                res.data = {
-                  success: true,
-                  data: rows,
-                  message: 'เพิ่มข้อมูลสำเร็จ !',
+                try {
+                  database.query(
+                    round,
+                    [
+                      rows.insertId,
+                    ],
+                    function (err, rows, fields) {
+                      if (err) {
+                        // res.status(200).json({ success: false, data: null, message: err });
+                        throw new Error(err)
+                      }
+                      res.data = {
+                        success: true,
+                        data: rows,
+                        message: 'เพิ่มข้อมูลสำเร็จ !',
+                      }
+                      next()
+                    }
+                  )
+                } catch (error) {
+                  return res
+                    .status(200)
+                    .json({
+                      success: false,
+                      data: null,
+                      message: error.message,
+                    })
                 }
-                next()
               }
             )
           } catch (error) {
@@ -1817,6 +1840,46 @@ exports.getCarRoundShow = (req, res, next) => {
       database.query(
         query,
         ['%' + req.body.route_id],
+        function (err, rows, fields) {
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
+          }
+
+          if (rows.length > 0) {
+            res.data = {
+              success: true,
+              data: rows,
+              message: 'พบข้อมูล !',
+            }
+            next()
+          } else {
+            res.data = {
+              success: false,
+              data: rows,
+              message: 'ไม่พบข้อมูล !',
+            }
+            next()
+          }
+          next()
+        }
+      )
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+
+exports.getCarRoundCar = (req, res, next) => {
+  return (req, res, next) => {
+    var query =
+      'SELECT * FROM car_round LEFT JOIN car on car_round.car_id = car.car_id LEFT JOIN company on car.company_id = company.company_id LEFT JOIN routes on routes.route_id = car.route_id WHERE car.car_id = ?'
+    try {
+      database.query(
+        query,
+        [req.body.car_id],
         function (err, rows, fields) {
           if (err) {
             // res.status(200).json({ success: false, data: null, message: err });

@@ -204,3 +204,7 @@ route.post('/getcarroundshow', car_tracking.getCarRoundShow(), function (req, re
   var response = res.data
   res.status(200).json(response)
 })
+route.post('/getcarroundcar', car_tracking.getCarRoundCar(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
