@@ -189,3 +189,18 @@ route.post('/getcarroutecompany', car_tracking.getCarRouteCompany(), function (r
   var response = res.data
   res.status(200).json(response)
 })
+
+// รอบ
+route.post('/getcarround', car_tracking.getCarRound(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+route.post('/updateround', car_tracking.updateRound(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+
+route.post('/getcarroundshow', car_tracking.getCarRoundShow(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})

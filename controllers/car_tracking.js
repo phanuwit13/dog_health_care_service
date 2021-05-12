@@ -1411,7 +1411,8 @@ exports.setPosition = (req, res, next) => {
 
 exports.getCarEnable = (req, res, next) => {
   return (req, res, next) => {
-    var query = 'SELECT * from car LEFT JOIN user on car.driver_id = user.driver_id where car.driver_id IS NOT NULL && route_id = ?'
+    var query =
+      'SELECT * from car LEFT JOIN user on car.driver_id = user.driver_id where car.driver_id IS NOT NULL && route_id = ?'
     try {
       database.query(query, [req.body.route_id], function (err, rows, fields) {
         if (err) {
@@ -1685,6 +1686,137 @@ exports.getCompanyNotRoute = (req, res, next) => {
       database.query(
         query,
         [req.body.company_id ? req.body.company_id : ''],
+        function (err, rows, fields) {
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
+          }
+
+          if (rows.length > 0) {
+            res.data = {
+              success: true,
+              data: rows,
+              message: 'พบข้อมูล !',
+            }
+            next()
+          } else {
+            res.data = {
+              success: false,
+              data: rows,
+              message: 'ไม่พบข้อมูล !',
+            }
+            next()
+          }
+          next()
+        }
+      )
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+exports.getCarRound = (req, res, next) => {
+  return (req, res, next) => {
+    var query =
+      'SELECT * FROM car_round LEFT JOIN car on car_round.car_id = car.car_id LEFT JOIN company on car.company_id = company.company_id LEFT JOIN routes on routes.route_id = car.route_id WHERE company.company_id LIKE ?'
+    try {
+      database.query(
+        query,
+        ['%' + req.body.company_id],
+        function (err, rows, fields) {
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
+          }
+
+          if (rows.length > 0) {
+            res.data = {
+              success: true,
+              data: rows,
+              message: 'พบข้อมูล !',
+            }
+            next()
+          } else {
+            res.data = {
+              success: false,
+              data: rows,
+              message: 'ไม่พบข้อมูล !',
+            }
+            next()
+          }
+          next()
+        }
+      )
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+exports.updateRound = (req, res, next) => {
+  return (req, res, next) => {
+    var query =
+      'UPDATE car_round SET round_1 = ?, round_2 = ?,round_3=?,round_4=? ,round_5=? , round_6 = ?,round_7=?,round_8=?,round_9=? ,round_10=? WHERE car_round_id =?;'
+    try {
+      database.query(
+        query,
+        [
+          req.body.round_1 === 'null' ? null : req.body.round_1,
+          req.body.round_2 === 'null' ? null : req.body.round_2,
+          req.body.round_3 === 'null' ? null : req.body.round_3,
+          req.body.round_4 === 'null' ? null : req.body.round_4,
+          req.body.round_5 === 'null' ? null : req.body.round_5,
+          req.body.round_6 === 'null' ? null : req.body.round_6,
+          req.body.round_7 === 'null' ? null : req.body.round_7,
+          req.body.round_8 === 'null' ? null : req.body.round_8,
+          req.body.round_9 === 'null' ? null : req.body.round_9,
+          req.body.round_10 === 'null' ? null : req.body.round_10,
+          req.body.car_round_id,
+        ],
+        function (err, rows, fields) {
+          console.log(
+            req.body.round_1,
+            req.body.round_2,
+            req.body.round_3,
+            req.body.round_4,
+            req.body.round_5,
+            req.body.round_6,
+            req.body.round_7,
+            req.body.round_8,
+            req.body.round_9,
+            req.body.round_10
+          )
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
+          }
+
+          res.data = {
+            success: true,
+            data: rows,
+            message: 'อัพเดทข้อมูลสำเร็จ !',
+          }
+          next()
+        }
+      )
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
+exports.getCarRoundShow = (req, res, next) => {
+  return (req, res, next) => {
+    var query =
+      'SELECT * FROM car_round LEFT JOIN car on car_round.car_id = car.car_id LEFT JOIN company on car.company_id = company.company_id LEFT JOIN routes on routes.route_id = car.route_id WHERE routes.route_id LIKE ?'
+    try {
+      database.query(
+        query,
+        ['%' + req.body.route_id],
         function (err, rows, fields) {
           if (err) {
             // res.status(200).json({ success: false, data: null, message: err });
