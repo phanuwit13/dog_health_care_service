@@ -988,11 +988,11 @@ exports.getRoutePosition = (req, res, next) => {
 exports.getRouteSelect = (req, res, next) => {
   return (req, res, next) => {
     var query =
-      'SELECT route_id,route_name,routes.route_company_id,route_price,route_company.company_id,route_number,company_name, company_address,company_phone FROM `routes` LEFT JOIN route_company ON routes.route_company_id = route_company.route_company_id LEFT JOIN company ON route_company.company_id = company.company_id WHERE routes.route_company_id LIKE ?'
+      'SELECT route_id,route_name,routes.route_company_id,route_price,route_company.company_id,route_number,company_name, company_address,company_phone FROM `routes` LEFT JOIN route_company ON routes.route_company_id = route_company.route_company_id LEFT JOIN company ON route_company.company_id = company.company_id WHERE company.company_id LIKE ?'
     try {
       database.query(
         query,
-        ['%' + req.body.route_company_id],
+        ['%' + req.body.company_id],
         function (err, rows, fields) {
           if (err) {
             // res.status(200).json({ success: false, data: null, message: err });
