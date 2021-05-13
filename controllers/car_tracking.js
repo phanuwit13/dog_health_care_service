@@ -1023,6 +1023,44 @@ exports.getRouteSelect = (req, res, next) => {
     }
   }
 }
+exports.getRouteSelection = (req, res, next) => {
+  return (req, res, next) => {
+    var query =
+      'SELECT route_id,route_name,routes.route_company_id,route_price,route_company.company_id,route_number,company_name, company_address,company_phone FROM `routes` LEFT JOIN route_company ON routes.route_company_id = route_company.route_company_id LEFT JOIN company ON route_company.company_id = company.company_id WHERE company.company_id LIKE ?'
+    try {
+      database.query(
+        query,
+        ['%' + req.body.company_id],
+        function (err, rows, fields) {
+          if (err) {
+            // res.status(200).json({ success: false, data: null, message: err });
+            throw new Error(err)
+          }
+
+          if (rows.length > 0) {
+            res.data = {
+              success: true,
+              data: rows,
+              message: 'พบข้อมูล !',
+            }
+            next()
+          } else {
+            res.data = {
+              success: false,
+              data: null,
+              message: 'ไม่พบข้อมูล !',
+            }
+            next()
+          }
+        }
+      )
+    } catch (error) {
+      return res
+        .status(200)
+        .json({ success: false, data: null, message: error.message })
+    }
+  }
+}
 exports.getRouteEdit = (req, res, next) => {
   return (req, res, next) => {
     var query = 'SELECT * from routes where route_id = ?'

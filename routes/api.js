@@ -133,6 +133,14 @@ route.post(
     res.status(200).json(response)
   }
 )
+route.post(
+  '/getrouteselection',
+  car_tracking.getRouteSelection(),
+  function (req, res) {
+    var response = res.data
+    res.status(200).json(response)
+  }
+)
 route.post('/getrouteedit', car_tracking.getRouteEdit(), function (req, res) {
   var response = res.data
   res.status(200).json(response)
