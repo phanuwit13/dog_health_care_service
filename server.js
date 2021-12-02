@@ -12,7 +12,7 @@ app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.get('/', (req, res) => {
-  res.send('Car Tracking Service')
+  res.send('dogs healt care')
 })
 
 app.use('/api', api)

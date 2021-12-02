@@ -11,7 +11,7 @@ const connection = process.env.PORT
       host: 'localhost',
       user: 'root',
       password: '',
-      database: 'car_tracking',
+      database: 'dogs_health',
     })
 
 // const connection = mysql.createConnection({
