@@ -2,10 +2,10 @@ var mysql = require('mysql')
 
 const connection = process.env.PORT
   ? mysql.createConnection({
-      host: 'wcwimj6zu5aaddlj.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
-      user: 'wbj4x2s8caz4aouq',
-      password: 'sxxd8dompo4bz4t8',
-      database: 'lfl2n7c3v5tz3hur',
+      host: 'uzb4o9e2oe257glt.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
+      user: 'a1mv92sc8uuqzzof',
+      password: 'exf9l5olt80cypks',
+      database: 'ikoa8irzupyxuqg1',
     })
   : mysql.createConnection({
       host: 'localhost',
