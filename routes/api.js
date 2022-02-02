@@ -41,12 +41,36 @@ route.get(
   }
 )
 
-route.post(
-  '/predict_disease',
-  training_data.training_data(),
-  dog_health_care.predictDisease(),
+route.get(
+  '/get_first_node',
+  dog_health_care.getFirstNode(),
   function (req, res) {
     var response = res.data
     res.status(200).json(response)
   }
 )
+
+route.post('/get_next_node', dog_health_care.getPredict(), function (req, res) {
+  var response = res.data
+  res.status(200).json(response)
+})
+
+route.post(
+  '/get_predict_disease',
+  dog_health_care.getPredictDisease(),
+  function (req, res) {
+    var response = res.data
+    res.status(200).json(response)
+  }
+)
+
+
+// route.post(
+//   '/predict_disease',
+//   training_data.training_data(),
+//   dog_health_care.predictDisease(),
+//   function (req, res) {
+//     var response = res.data
+//     res.status(200).json(response)
+//   }
+// )
